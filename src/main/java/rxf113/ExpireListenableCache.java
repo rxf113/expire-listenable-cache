@@ -59,10 +59,18 @@ public class ExpireListenableCache<K, V> {
         return idx == null ? null : table[idx].val;
     }
 
-    private void put(K key, V val, boolean ifRefreshExpireTime) {
-        put(key, val, ifRefreshExpireTime, null);
+
+    /**
+     * 自定义节点过期时间
+     */
+    public void put(K key, V val, boolean ifRefreshExpireTime, BiConsumer<K, V> expireConsumer, Duration expireTime) {
+        CacheNode<K, V> cacheNode = new CacheNode<>(key, val, ifRefreshExpireTime, expireTime.toNanos(), expireConsumer);
+        putVal(cacheNode);
     }
 
+    /**
+     * 统一使用 builder 中的过期时间
+     */
     public void put(K key, V val, boolean ifRefreshExpireTime, BiConsumer<K, V> expireConsumer) {
         CacheNode<K, V> cacheNode = new CacheNode<>(key, val, ifRefreshExpireTime, intervalExpireTime, expireConsumer);
         putVal(cacheNode);
