@@ -57,11 +57,10 @@ public final class LoopTableProcessor<K, V> {
                                             node.nextNanoExpireTime = System.nanoTime() + node.intervalExpireTime;
                                         } else {
                                             //删除缓存
+                                            node.casSetState(2, 3);
                                             Integer deleteIdx = lruCache.get(node.key);
-                                            table[deleteIdx] = null;
-                                            lruCache.removeNode(lruCache.getNode(node.key));
-                                            //记录下删除的位置, 后续put寻找空位置使用
                                             deleteIdxList.add(deleteIdx);
+                                            //记录下删除的位置, 后续put寻找空位置使用
                                         }
                                         node.casSetState(2, 0);
                                     }

@@ -92,11 +92,18 @@ public class ExpireListenableCache<K, V> {
                     setTableNodeAndSyncLruCache(tableIdx++, cacheNode);
                 } else {
                     //table已经满了, 判断存不存在已删除的位置
-                    if (!DELETE_IDX_LIST.isEmpty()) {
+                    boolean foundDeleteIdx = false;
+                    while (!DELETE_IDX_LIST.isEmpty()) {
                         //存在已删除的位置, 新node放到删除位置
                         int deletedIdx = DELETE_IDX_LIST.remove(0);
-                        setTableNodeAndSyncLruCache(deletedIdx, cacheNode);
-                    } else {
+                        if (table[deletedIdx].getState() == 3) {
+                            setTableNodeAndSyncLruCache(deletedIdx, cacheNode);
+                            foundDeleteIdx = true;
+                            break;
+                        }
+                        //否则表示, loop线程删除此位置时, 刚好此位置作为eldest主动删除, 然后发生了替换, 所以此位置保留
+                    }
+                    if (!foundDeleteIdx) {
                         //不存在已删除的位置, 主动删除 eldest node
                         LRUCache.Node<K, Integer> tail = lruCache.removeTail();
                         setTableNodeAndSyncLruCache(tail.getValue(), cacheNode);

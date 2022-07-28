@@ -14,9 +14,13 @@ public class CasNode {
     protected static final Unsafe UNSAFE = getUnsafe();
 
     /**
-     * 状态 1: 被loop线程占有, 2: 被业务线程占有, 0: 空闲
+     * 状态 1: 被loop线程占有, 2: 被业务线程占有, 0: 空闲, 3: 被删除
      */
     private volatile int state = 0;
+
+    public int getState() {
+        return state;
+    }
 
     private static final long STATE_OFFSET;
 
