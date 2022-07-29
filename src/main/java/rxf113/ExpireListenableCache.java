@@ -105,7 +105,7 @@ public class ExpireListenableCache<K, V> {
                     }
                     if (!foundDeleteIdx) {
                         //不存在已删除的位置, 主动删除 eldest node
-                        LRUCache.Node<K, Integer> tail = lruCache.removeTail();
+                        LRUCache.Node<K, Integer> tail = lruCache.manualRemoveTail();
                         setTableNodeAndSyncLruCache(tail.getValue(), cacheNode);
                     }
                 }

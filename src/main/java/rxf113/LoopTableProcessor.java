@@ -1,5 +1,6 @@
 package rxf113;
 
+import java.sql.Time;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,6 +66,7 @@ public final class LoopTableProcessor<K, V> {
                                         node.casSetState(2, 0);
                                     }
                                 });
+                                minDiff = Math.min(minDiff, node.intervalExpireTime);
                             } else {
                                 node.casSetState(1, 0);
                                 minDiff = Math.min(minDiff, -diff);

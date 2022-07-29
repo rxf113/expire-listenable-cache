@@ -103,7 +103,17 @@ public class LRUCache<K, V> {
 
     }
 
-    public Node<K, V> removeTail() {
+    public Node<K, V> manualRemoveTail() {
+        if (tail.pre == head) {
+            throw new NullPointerException("容器容量为空");
+        }
+        Node<K, V> tailPre = tail.pre;
+        removeNode(tailPre);
+        --size;
+        return tailPre;
+    }
+
+    private Node<K, V> removeTail() {
         if (tail.pre == head) {
             throw new NullPointerException("容器容量为空");
         }
