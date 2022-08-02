@@ -27,7 +27,8 @@ public class ExpireListenableCacheTest {
             int finalI = i;
             System.out.println(i);
             cache.put("k" + i, "v" + i, true, (k, v) -> {
-                System.out.println("过期回调k" + finalI + ": " + formatter.format(LocalDateTime.now()));
+                System.out.println("过期回调k" + finalI + ": " + formatter.format(LocalDateTime.now()) + " v: " + v);
+                return 234 + " " + v;
             });
         }
 
