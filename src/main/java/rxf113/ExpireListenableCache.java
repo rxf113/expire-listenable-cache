@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 /**
  * 可监听过期事件的缓存
@@ -73,6 +74,11 @@ public class ExpireListenableCache<K, V> {
      */
     public void put(K key, V val, boolean ifRefreshExpireTime, BiConsumer<K, V> expireConsumer) {
         CacheNode<K, V> cacheNode = new CacheNode<>(key, val, ifRefreshExpireTime, intervalExpireTime, expireConsumer);
+        putVal(cacheNode);
+    }
+
+    public void put(K key, V val, boolean ifRefreshExpireTime, BiFunction<K, V, ?> expireCallbackFunction) {
+        CacheNode<K, V> cacheNode = new CacheNode<>(key, val, ifRefreshExpireTime, intervalExpireTime, expireCallbackFunction);
         putVal(cacheNode);
     }
 

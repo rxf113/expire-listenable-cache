@@ -1,12 +1,13 @@
 package rxf113;
 
-import java.sql.Time;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 /**
  * @author rxf113
@@ -35,6 +36,7 @@ public final class LoopTableProcessor<K, V> {
         this.deleteIdxList = deleteIdxList;
     }
 
+    @SuppressWarnings("unchecked")
     private void eventLoopCheck() {
         loopExecutorsService.execute(() -> {
             while (true) {
@@ -52,16 +54,29 @@ public final class LoopTableProcessor<K, V> {
                                 callbackExecutorService.execute(() -> {
                                     //执行回调的线程占有当前node
                                     if (node.casSetState(1, 2)) {
-                                        node.expireCallbackConsumer.accept(node.key, node.val); //执行过期回调
+                                        //执行过期回调
+                                        Object nodeCallback = node.getCallback();
+                                        V newVal = null;
+                                        if (nodeCallback instanceof BiFunction) {
+                                            BiFunction<K, V, V> callback = ((BiFunction<K, V, V>) nodeCallback);
+                                            newVal = callback.apply(node.key, node.val);
+                                        } else {
+                                            BiConsumer<K, V> callback = ((BiConsumer<K, V>) nodeCallback);
+                                            callback.accept(node.key, node.val);
+                                        }
                                         //刷新过期时间, 不删除缓存
                                         if (node.ifRefreshExpireTime) {
                                             node.nextNanoExpireTime = System.nanoTime() + node.intervalExpireTime;
+                                            //更新缓存
+                                            if (newVal != null) {
+                                                node.val = newVal;
+                                            }
                                         } else {
                                             //删除缓存
                                             node.casSetState(2, 3);
                                             Integer deleteIdx = lruCache.get(node.key);
-                                            deleteIdxList.add(deleteIdx);
                                             //记录下删除的位置, 后续put寻找空位置使用
+                                            deleteIdxList.add(deleteIdx);
                                         }
                                         node.casSetState(2, 0);
                                     }
