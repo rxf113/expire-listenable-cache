@@ -1,7 +1,6 @@
 # expire-listenable-cache
 
-### 过期主动执行回调的本地key value缓存方案，目的是用更简单的方式对定时类任务进行处理
-
+### 过期主动执行回调的本地key value缓存方案，目的是更简单的处理定时类任务
 
 > 实现方法是: 尝试用一个单独的loop线程，轮询缓存中所有节点，判断过期时间并主动触发回调
 
@@ -23,12 +22,14 @@ ExpireListenableCache<String, Object> cache=ExpireListenableCache
 
         //consumer
         cache.put("k1","v1",true,(k,v)->{
-        System.out.println("过期回调k1: "+formatter.format(LocalDateTime.now()));
+            //逻辑处理
+            System.out.println("过期回调k1: "+formatter.format(LocalDateTime.now()));
         });
 
-//function
+//        function
 //        cache.put("k" + i, "v" + i, true, (k, v) -> {
-//        System.out.println("过期回调k" + finalI + ": " + formatter.format(LocalDateTime.now()) + " v: " + v);
+//          //逻辑处理
+//          System.out.println("过期回调k" + finalI + ": " + formatter.format(LocalDateTime.now()) + " v: " + v);
 //        return "newVal";
 //        });
 
